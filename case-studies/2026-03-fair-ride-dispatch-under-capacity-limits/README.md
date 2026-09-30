@@ -70,3 +70,7 @@ stateDiagram-v2
 ## The Why
 
 It's tempting to treat a feature like this as purely a coding problem and just start building. But most of the real work here happened before any code was written: deciding what "fair" actually means for this product, writing that decision down in plain language, and thinking through how it would actually feel to a guest on the receiving end of it, right down to a detail as small as staying quiet instead of announcing a recovery. Once those decisions were made and written down clearly, the actual code was the easy part.
+
+## Companion
+
+A short, simplified code sketch of the cap rule, with its test, is in [code-sketch.md](code-sketch.md).
