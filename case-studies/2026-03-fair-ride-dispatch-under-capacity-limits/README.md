@@ -70,3 +70,59 @@ stateDiagram-v2
 ## The Why
 
 It's tempting to treat a feature like this as purely a coding problem and just start building. But most of the real work here happened before any code was written: deciding what "fair" actually means for this product, writing that decision down in plain language, and thinking through how it would actually feel to a guest on the receiving end of it, right down to a detail as small as staying quiet instead of announcing a recovery. Once those decisions were made and written down clearly, the actual code was the easy part.
+
+## Code Sketch
+
+<details>
+<summary><b>Show the code sketch: the garage cap rule</b></summary>
+
+<br>
+
+*A simplified illustration written for this write-up, not production code. It covers the Limited state, where a cap on active rides decides who gets served this round and who waits.*
+
+```ts
+type Mode = "normal" | "limited" | "paused";
+
+interface Garage {
+  mode: Mode;
+  cap: number;         // most active rides allowed at the garage at once
+  activeCount: number; // rides currently active to or from the garage
+}
+
+interface RideRequest {
+  vehiclesAssigned: number; // 0 means brand new, more than 0 means partly served
+}
+
+// Decide whether the dispatcher may work on this request in this round.
+// Returning false does not reject the request. It stays in the queue,
+// keeps its place, and is looked at again next round.
+function canDispatch(request: RideRequest, garage: Garage): boolean {
+  // Normal needs no limits. Paused is enforced earlier, at booking time.
+  if (garage.mode !== "limited") return true;
+
+  // A party that already holds a slot must be allowed to finish. If the cap
+  // blocked it, a large party could wait forever for its second vehicle
+  // because its own first ride counts against the limit.
+  const isPartlyServed = request.vehiclesAssigned > 0;
+  if (isPartlyServed) return true;
+
+  // Only brand new requests are held back once the cap is reached.
+  return garage.activeCount < garage.cap;
+}
+```
+
+The test that matters most protects the situation that would otherwise deadlock:
+
+```ts
+const atCap: Garage = { mode: "limited", cap: 2, activeCount: 2 };
+
+test("lets a partly served party get its next vehicle even at the cap", () => {
+  assert.equal(canDispatch({ vehiclesAssigned: 1 }, atCap), true);
+});
+```
+
+Some parties are too big for one vehicle, so they are served in pieces. Once the first vehicle is assigned, that party already counts against the cap. If the cap applied to it again, a party of twelve could sit at the limit forever, waiting for a second vehicle that its own first ride is blocking. So the cap only applies to brand new requests, and anything already in motion is allowed to finish.
+
+The full sketch, with all four tests and a note on a choice I made on purpose, is in [code-sketch.md](code-sketch.md).
+
+</details>
