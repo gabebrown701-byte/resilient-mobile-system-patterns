@@ -50,9 +50,9 @@ The full list, with what each one let a careless or hostile author do, is in [`r
 - **Over a dozen independent review passes found roughly two dozen distinct defects.** Each one is logged with what was done about it, including the few I could not fully fix.
 - **3 and 5 failing checks** when two of the real bugs were put back into the public extract, to prove the tests can fail (details in the code sketch).
 
-## Where this stands, honestly
+## Where this stands
 
-The gate is designed, tested and reviewed, but it is **not enforcing anything yet**. It runs in an advisory mode that reports and never blocks. It has not yet run on a hosted CI service. And no device test is automated in CI yet, so a green check today means "these tests were *selected*", not "these tests *passed*". The gate says that in its own summary, because a green light that quietly means less than it appears to is the failure I built this to avoid.
+The gate is built, tested (176 tests, run locally against real git repositories) and independently reviewed. I've deliberately left it in advisory mode: it reports what it would do and blocks nothing. I won't turn enforcement on until the main user journeys have automated tests behind them. Until then a green check means "these tests were selected", not "these tests passed", and the gate's own summary says exactly that. Wiring it into my pipeline is the next step once those journeys are automated.
 
 ## The Why
 
