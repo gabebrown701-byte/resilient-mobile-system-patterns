@@ -4,6 +4,7 @@ Real product and engineering problems from building a production-grade mobile ap
 
 ## Process & Tooling
 - **[A Merge Gate That Never Trusts a Sentence Someone Typed](case-studies/2026-10-merge-gate-that-never-trusts-typed-approvals/)**. A risky change needs a human to approve it, but "approved by me" is just text anyone (or any AI working as me) can type. The fix: an approval only counts if a named reviewer really approved the latest version and their own review quotes the exact line. Includes runnable code. About 2,400 lines of gate code backed by about 2,800 lines of tests, 176 tests in all, and roughly two dozen distinct defects found by independent review rounds.
+- **[The Safety Check That Refused a Healthy Machine](case-studies/2026-10-measure-before-you-fix-simulator-load/)**. My own pre-flight check kept blocking test runs on a machine that was fine, because it was reading numbers that lag or go stale. Measured instead of guessed: a simulator boot pegs the CPU at 0% idle for about 35 seconds, while the "load" reading stayed high for minutes after the CPU was already 88 to 94% idle. Includes a runnable demo of the check failing open versus failing closed.
 - **[A Code Review Process That Can Block Me From Stopping Until It's Satisfied](case-studies/2026-09-codex-adversarial-code-review-process/)**. A governed AI code review gate that checks implementations against actual product intent, not just syntax. 15 distinct, confirmed defects caught in a single day of focused work, none of them a repeat of the same issue.
 
 ## Platform & Native Integration
