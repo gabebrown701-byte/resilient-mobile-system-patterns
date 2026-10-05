@@ -2,6 +2,7 @@
 
 *A product and systems design problem from a ride-dispatch app that lets guests book without creating an account.*
 
+
 ## The problem
 
 I wanted the first ride to feel almost effortless.
@@ -41,7 +42,7 @@ The second problem matters beyond the guest. A duplicate request can take anothe
 
 The answer was not to make every guest create an account.
 
-That would solve the technical problem by adding friction to the product's most important moment: getting someone from "I need a ride" to "my ride is requested."
+That would solve the technical problem by adding friction to the product's most important moment: getting someone from "I need a ride" to "my ride is requested." I wanted people to use the product quickly and with as little hassle as possible so I could learn from real usage and improve the experience.
 
 I made a deliberate tradeoff:
 
