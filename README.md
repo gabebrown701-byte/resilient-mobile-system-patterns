@@ -13,5 +13,8 @@ Real product and engineering problems from building a production-grade mobile ap
 ## Systems & Concurrency
 - **[Making Sure "Stop" Actually Means Stop](case-studies/2026-09-crash-safe-locking-for-ios-android-test-automation/)**. A shared-resource safeguard for automated tests, and the gap where stopping the supervisor didn't actually stop the real work underneath it. Proven by deliberately causing the failure, not just reading the code. 7 distinct defects caught and fixed, plus the load-average-96 incident that started the investigation, fully resolved.
 
+## Product Design & Reliability
+- **[When Your Ride Survives, But Your Login Doesn't](case-studies/2026-02-anonymous-ride-recovery-after-reinstall/)**. A product and systems design problem caused by anonymous booking: the ride can still be active after a reinstall even though the app no longer recognizes the guest. The recovery design reconnects the existing ride instead of creating another one, while using a 6-digit backup code, venue scoping, rate limiting, server-side checks, and transaction-safe ownership changes.
+
 ## Product Design & Fairness
 - **[When You Can't Serve Everyone at Once, Who Waits?](case-studies/2026-03-fair-ride-dispatch-under-capacity-limits/)**. Designing a congestion-governance system where "fair" had to be explicitly defined before it could be built. 4 distinct ways to define fairness were worked through on purpose, and 6 tricky situations were resolved with a written answer before any implementation began.
