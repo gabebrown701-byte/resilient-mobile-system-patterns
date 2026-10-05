@@ -419,10 +419,6 @@ async function recoverRide(callerUid, venueId, backupCode) {
 }
 ~~~
 
-The code is intentionally boring.
-
-That is a good thing.
-
 The interesting product work was deciding **what the function is allowed to do**, what it must never reveal, and which parts of the ride must remain untouched.
 
 </details>
