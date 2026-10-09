@@ -10,7 +10,7 @@ Imagine receiving a report that says a layout operation failed. Was the person u
 
 Those details can change where an investigation should start. Without them, the team may have to reproduce the problem, guess at the conditions, or ask questions the report could have answered automatically.
 
-The product has two distinct experiences—one for people requesting rides and another for the drivers fulfilling them—running across iOS and Android. I wanted incident reports to carry enough **relevant context to narrow the investigation**, without creating a second source of truth for application state.
+The product has two distinct experiences: one for people requesting rides and another for drivers fulfilling them. They run across iOS and Android. I wanted incident reports to carry enough **relevant context to narrow the investigation**, without creating a second source of truth for application state.
 
 ## The product decision
 
@@ -46,7 +46,7 @@ A report with context
    was on the active-ride screen, with large text enabled."
 ~~~
 
-*Illustration only—not a real crash report or a claim about a specific production incident.*
+*Illustration only. This is not a real crash report or a claim about a specific production incident.*
 
 ## The wiring mattered more than the key names
 
@@ -64,7 +64,7 @@ The shared service extends the existing diagnostics approach rather than introdu
 
 ## A test uncovered a real reporting bug
 
-One of the most important results came from testing the *connection* between navigation and diagnostics—not from testing the screen classifier in isolation.
+One of the most important results came from testing the connection between navigation and diagnostics, rather than testing the screen classifier in isolation.
 
 The first implementation listened to a route-information notification that arrived **before navigation had finished resolving the new route**. That meant diagnostics could read an empty route at startup or the route the person had just left, instead of the route they had just reached.
 
@@ -80,7 +80,7 @@ flowchart TD
     G --> H[Test exposes the mismatch]
 ~~~
 
-This is the principle I wanted to enforce: **test that the signal is accurate at the real integration point, not merely that a helper function works on its own.**
+The important distinction is that the test checked the actual connection between the router and diagnostics, not just whether a helper function returned the expected label.
 
 ## Looking beyond crashes: measure UX friction too
 
@@ -122,14 +122,12 @@ Those results establish that the implementation was tested and buildable at that
 
 ## Privacy and scope
 
-The public example is intentionally sanitized. It contains no real venue identifier, user or booking identifiers, recovery codes, Firebase project identifiers, credentials, production logs, or internal repository paths. Any example values are illustrative.
+The public examples use illustrative values and omit actual venue, user, and booking identifiers, recovery codes, Firebase project identifiers, credentials, and production logs. The code sketch is not copied production code.
 
-The diagnostic keys described here focus on bounded operational context. The goal is to make a report easier to investigate—not to collect a passenger's identity or arbitrary free-text content.
+The implementation records bounded operational context, including a venue context key. This case study does not publish a real venue value or arbitrary user-provided text. The aim is to make reports easier to investigate without turning diagnostics into a collection of unrelated personal information.
 
-## What this says about how I build
+## The takeaway
 
-The work was not simply “add monitoring.” It required product judgment about **which facts would change an investigation**, architecture judgment about **where those facts should come from**, and testing discipline to verify that the facts were correct when real navigation and state changes occurred.
+Useful observability is not about collecting the most data. It is about collecting a small amount of accurate context, at the right moment, from the right source.
 
-I also made the limits explicit: diagnostic context can guide an investigation, but it is not proof of a root cause; UX events are signals to inspect, not automatic judgments about users; and a non-fatal classifier is not a substitute for visual accessibility tests.
-
-That is the kind of observability I want in a product: enough signal to learn from failures and friction, without creating new failure modes or claiming outcomes that have not been measured.
+This implementation adds context to crash reports and signals that can help the team investigate UX friction. It does not, by itself, establish a root cause or prove that the experience improved. Those questions still require investigation and production measurement.

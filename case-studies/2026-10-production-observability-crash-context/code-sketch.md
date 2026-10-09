@@ -1,62 +1,66 @@
-# Sanitized sketch: making reports more actionable
+# Code sketches: making reports more actionable
 
-This is a conceptual example written for this case study, **not copied production code**. Values are illustrative and identifiers are redacted.
+These examples illustrate the implementation decisions described in the case study. They are simplified for readability and are not complete, drop-in production code.
 
-## 1. Describe the experience with a small context object
+## 1. Read the route after navigation resolves
+
+The first version listened for a change to the raw route information and immediately read the router's current configuration. That notification could arrive before the new route had finished resolving.
+
+**Risky timing:**
 
 ```dart
-final reportContext = <String, Object>{
-  'platform': 'ios',
-  'flavor': 'driver',
-  'presentation_variant': 'native',
-  'theme_mode': 'dark',
-  'language': 'en',
-  'accessibility_mode': 'large_text,reduce_motion',
-  'text_scale': 1.5,
-  'screen': 'active_ride',
-  'journey': 'driver_active_ride',
-  'ride_status': 'assigned',
-  'venue_id': '<redacted-venue-id>',
+// The route-information notification can fire before resolution finishes.
+router.routeInformationProvider.addListener(() {
+  final path = router.routerDelegate.currentConfiguration.uri.path;
+  reportScreen(path); // May still be empty or the previous route.
+});
+```
+
+**Use the resolved navigation state instead:**
+
+```dart
+router.routerDelegate.addListener(() {
+  final path = router.routerDelegate.currentConfiguration.uri.path;
+  reportScreen(path);
+});
+```
+
+In the actual implementation, this change made the diagnostic listener read the route after the router updated its current configuration. A test of the real listener path reproduced the stale-value problem and verified the corrected behavior.
+
+## 2. Test the value that is recorded, not only that the method runs
+
+A setter can complete without throwing while still recording the wrong value. The test seam makes it possible to verify the actual key and value sent by the diagnostic service.
+
+```dart
+final captured = <String, Object>{};
+
+service.debugKeySink = (key, value) {
+  captured[key] = value;
 };
+
+service.setRideStatus(RideStatus.awaitingDriver);
+
+expect(captured['ride_status'], 'awaiting-driver');
 ```
 
-The object is an illustration of the shape of the context, not a live report. Real values must come from the application's current sources of truth. Do not put names, emails, booking IDs, ticket numbers, recovery codes, tokens, or free-text user content into this context.
+This matters because the application uses a backend status string with a hyphen, rather than the Dart enum's camel-case name. The assertion checks the contract that a report actually needs.
 
-## 2. Update navigation context only after the route is resolved
+## 3. Do not let reporting failures interrupt the user flow
 
-```dart
-// Conceptual sequence, not the production listener implementation.
-void onResolvedNavigation(String screen, String journey) {
-  diagnostics.setScreen(screen);
-  diagnostics.setJourney(journey);
-}
-```
-
-The timing matters. Reading navigation state before the router finishes resolving a destination can record the previous screen—or no screen at all. The test should exercise the actual router-to-diagnostics connection, not only test how a path is classified.
-
-## 3. Keep diagnostic collection from becoming a new failure
+Diagnostic reporting should be best-effort. The app should not fail because a logging SDK could not accept a value.
 
 ```dart
-void safelyRecord(void Function() record) {
+void safelyReport(void Function() record) {
   try {
     record();
   } catch (_) {
-    // Reporting failure must not crash the user-facing app.
+    // A reporting failure must not interrupt the user flow.
   }
 }
 ```
 
-This is the basic safety boundary: telemetry is best-effort, and the application should remain usable if the reporting SDK cannot accept a value.
+The production service follows this pattern around Crashlytics custom-key updates and selected non-fatal reporting calls. Error handling for fatal framework reports preserves the existing fatal-reporting behavior.
 
-## 4. Treat UX events as signals for investigation
+## What these examples do not prove
 
-Examples of structured event names used by the instrumentation:
-
-- `rage_tap`
-- `backtrack`
-- `dead_end_guard_triggered`
-- `appearance_preference_changed`
-- `dark_mode_session_active`
-- `reduce_motion_detected`
-
-Their meaning depends on the context and surrounding behavior. For example, a backtrack can be a sign of confusion—or a deliberate choice. These events help identify patterns; they do not prove user frustration or establish business impact on their own.
+The snippets explain the timing, testing, and safety principles. They do not replace the full app wiring, and they do not demonstrate a measured reduction in crash rates or incident-resolution time.
