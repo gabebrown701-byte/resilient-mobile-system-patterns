@@ -10,6 +10,9 @@ Real product and engineering problems from building a production-grade mobile ap
 ## Platform & Native Integration
 - **[Android and iOS Lie About Permission State, Just in Opposite Directions](case-studies/2026-09-android-ios-location-permission-bug/)**. A permission bug that required reading the native plugin's own source to diagnose, caught pre-launch through 3 independent rounds of adversarial review, each one catching a genuinely different failure mode.
 
+## Product & Operational Observability
+- **[When the App Breaks, Can You Tell What the User Was Experiencing?](case-studies/2026-10-production-observability-crash-context/)**. Adds structured crash context across two mobile app experiences and instruments UX-friction signals. A real navigation wiring test exposed stale screen metadata; the fix made reports more accurate without claiming unmeasured reductions in incident time or business impact.
+
 ## Systems & Concurrency
 - **[Making Sure "Stop" Actually Means Stop](case-studies/2026-09-crash-safe-locking-for-ios-android-test-automation/)**. A shared-resource safeguard for automated tests, and the gap where stopping the supervisor didn't actually stop the real work underneath it. Proven by deliberately causing the failure, not just reading the code. 7 distinct defects caught and fixed, plus the load-average-96 incident that started the investigation, fully resolved.
 
