@@ -80,6 +80,36 @@ A few examples from the backend work:
 
 That separation lets the interface be useful to a non-technical operator without making the client trusted.
 
+## A sanitized sketch of the real control flow
+
+The actual backend follows this sequence for a high-impact operator action:
+
+```text
+operator requests ride cancellation
+    |
+    +--> verify operator role
+    |
+    +--> read the current ride inside a transaction
+           |
+           +--> already completed/cancelled? return safely
+           |
+           +--> currently in progress?
+           |       |
+           |       +--> no explicit confirmation -> stop
+           |
+           +--> mark the ride cancelled
+           |
+           +--> reconcile every assigned driver's active work
+    |
+    +--> commit the state change atomically
+    |
+    +--> record the operator action in the audit trail
+    |
+    +--> emit the operational metric
+```
+
+That is a sanitized representation of the production pattern, not a hypothetical architecture. The private implementation uses the same role gate, terminal-state idempotency, explicit confirmation for an in-progress ride, transactional ride/driver reconciliation, audit logging, and operational measurement. Application identifiers and implementation-specific details are intentionally omitted.
+
 ## The guest experience is part of the operations product
 
 One decision I made was not to treat "service unavailable" as a dead end.
